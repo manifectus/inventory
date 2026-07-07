@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Інвентаризація — Дудченко Я.А.</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Інвентаризація">
+<meta name="theme-color" content="#232E3B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE7D6;
+    --paper-card:#F8F4E8;
+    --ink:#232E3B;
+    --ink-soft:#5B6572;
+    --rule:#CBBF9F;
+    --rule-strong:#A99B72;
+    --green:#33604A;
+    --green-bg:#DEE9DD;
+    --amber:#A9701C;
+    --amber-bg:#F3E4C6;
+    --red:#9C3B33;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--rule) 1px, transparent 1px);
+    background-size: 100% 32px;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding-bottom:60px;
+  }
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:var(--ink);
+    color:var(--paper-card);
+    padding:16px 16px 12px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  header.top h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:20px;
+    margin:0 0 2px;
+    letter-spacing:.2px;
+  }
+  header.top .sub{
+    font-size:12px;
+    opacity:.75;
+    margin:0 0 12px;
+  }
+  .progress-wrap{
+    display:flex; align-items:center; gap:10px;
+  }
+  .progress-bar{
+    flex:1; height:7px; background:rgba(255,255,255,.18);
+    border-radius:4px; overflow:hidden;
+  }
+  .progress-bar > div{
+    height:100%; background:#7FBF9E; border-radius:4px;
+    transition:width .25s ease;
+  }
+  .progress-label{ font-size:11px; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+
+  .tabs{
+    display:flex; gap:6px; margin-top:14px;
+  }
+  .tab-btn{
+    flex:1; text-align:center; padding:9px 6px;
+    font-family:'Fraunces',serif; font-weight:500; font-size:13px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.18);
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+    color:rgba(255,255,255,.65);
+  }
+  .tab-btn.active{
+    background:var(--paper);
+    color:var(--ink);
+    border-color:var(--paper);
+  }
+
+  main{ padding:14px 12px 10px; }
+
+  .search-row{
+    display:flex; gap:8px; margin-bottom:14px;
+  }
+  .search-row input{
+    flex:1; padding:10px 12px; border-radius:8px;
+    border:1px solid var(--rule-strong);
+    background:var(--paper-card); font-size:14px; color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .search-row button{
+    padding:10px 12px; border-radius:8px; border:1px solid var(--rule-strong);
+    background:var(--paper-card); color:var(--ink-soft); font-size:12px;
+  }
+
+  .batch{
+    margin-bottom:22px;
+  }
+  .batch-head{
+    background:var(--ink); color:var(--paper-card);
+    padding:10px 12px; border-radius:8px 8px 0 0;
+  }
+  .batch-head .acc{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; opacity:.7;
+    letter-spacing:.3px;
+  }
+  .batch-head .contragent{
+    font-family:'Fraunces',serif; font-weight:600; font-size:14.5px; margin-top:3px;
+  }
+  .batch-head .contract{
+    font-size:11.5px; opacity:.8; margin-top:2px;
+  }
+  .batch-summary{
+    display:flex; justify-content:space-between; font-size:11px;
+    font-family:'IBM Plex Mono',monospace; opacity:.85; margin-top:6px;
+    border-top:1px dashed rgba(255,255,255,.25); padding-top:6px;
+  }
+
+  .item{
+    background:var(--paper-card);
+    border:1px solid var(--rule);
+    border-top:none;
+    padding:12px;
+    position:relative;
+    overflow:hidden;
+  }
+  .item:last-child{ border-radius:0 0 8px 8px; }
+
+  .item.done{
+    background:var(--green-bg);
+  }
+
+  .item-top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+  }
+  .nomen{
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--ink-soft); background:rgba(0,0,0,.05);
+    padding:2px 6px; border-radius:4px; display:inline-block;
+  }
+  .name{
+    font-weight:500; font-size:14.5px; margin:6px 0 2px; line-height:1.35;
+  }
+  .meta-row{
+    display:flex; justify-content:space-between; font-size:12px;
+    color:var(--ink-soft); margin-top:4px; font-family:'IBM Plex Mono',monospace;
+  }
+
+  .stamp{
+    position:absolute; top:8px; right:10px;
+    font-family:'Fraunces',serif; font-weight:600; font-size:11px;
+    color:var(--green); border:2px solid var(--green);
+    border-radius:6px; padding:2px 8px;
+    transform:rotate(-8deg);
+    opacity:0; transition:opacity .2s ease;
+    pointer-events:none;
+    letter-spacing:.5px;
+  }
+  .item.done .stamp{ opacity:.85; }
+
+  .qty-row{
+    display:flex; align-items:center; gap:8px; margin-top:10px;
+  }
+  .qty-bar-wrap{
+    flex:1;
+  }
+  .qty-text{
+    font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);
+    display:flex; justify-content:space-between; margin-bottom:3px;
+  }
+  .qty-bar{
+    height:6px; background:rgba(0,0,0,.08); border-radius:3px; overflow:hidden;
+  }
+  .qty-bar > div{
+    height:100%; background:var(--amber); border-radius:3px; transition:width .2s;
+  }
+  .item.done .qty-bar > div{ background:var(--green); }
+
+  .add-row{
+    display:flex; gap:6px; margin-top:10px;
+  }
+  .add-row input[type=number]{
+    width:74px; padding:8px; border-radius:6px; border:1px solid var(--rule-strong);
+    font-size:14px; text-align:center; font-family:'IBM Plex Mono',monospace;
+    background:#fff;
+  }
+  .add-row button{
+    padding:8px 12px; border-radius:6px; border:1px solid var(--rule-strong);
+    background:var(--ink); color:var(--paper-card); font-size:12.5px; font-weight:500;
+  }
+  .add-row .clear-btn{
+    background:transparent; color:var(--ink-soft); border:1px solid var(--rule);
+  }
+  .toggle-btn{
+    padding:8px 10px; border-radius:6px; border:1px solid var(--rule-strong);
+    background:transparent; color:var(--ink-soft); font-size:12.5px;
+    margin-left:auto;
+  }
+  .item.done .toggle-btn{ color:var(--green); border-color:var(--green); }
+
+  textarea.note{
+    width:100%; margin-top:10px; border-radius:6px; border:1px solid var(--rule-strong);
+    background:#fff; font-family:'Inter',sans-serif; font-size:13px;
+    padding:8px; resize:vertical; min-height:36px;
+  }
+  textarea.note::placeholder{ color:#9a9484; }
+
+  .footer-note{
+    text-align:center; font-size:11px; color:var(--ink-soft); margin-top:18px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  .reset-all{
+    display:block; margin:20px auto 0; padding:8px 14px;
+    border-radius:6px; border:1px solid var(--red); color:var(--red);
+    background:transparent; font-size:12px;
+  }
+
+  .import-row{
+    display:flex; gap:8px; margin-top:12px; align-items:center;
+    flex-wrap:wrap;
+  }
+  .import-btn{
+    padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.08); color:var(--paper-card); font-size:12.5px;
+    font-family:'Inter',sans-serif; font-weight:500; cursor:pointer;
+  }
+  .import-btn:hover{ background:rgba(255,255,255,.16); }
+  .import-clear-btn{
+    padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.2);
+    background:transparent; color:rgba(255,255,255,.6); font-size:11.5px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .import-status{
+    font-size:10.5px; font-family:'IBM Plex Mono',monospace; color:rgba(255,255,255,.55);
+    width:100%; margin-top:2px;
+  }
+
+  @media (min-width:640px){
+    main{ padding:14px 24px; }
+  }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(35,46,59,.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:24px;
+  }
+  .modal-box{
+    background:var(--paper-card); border-radius:10px;
+    padding:20px; max-width:340px; width:100%;
+    border:1px solid var(--rule-strong);
+  }
+  .modal-box p{
+    font-size:14px; line-height:1.5; margin:0 0 16px; color:var(--ink);
+  }
+  .modal-actions{
+    display:flex; gap:8px; justify-content:flex-end;
+  }
+  .modal-actions button{
+    padding:9px 14px; border-radius:6px; font-size:13px; border:1px solid var(--rule-strong);
+    background:transparent; color:var(--ink-soft);
+  }
+  .modal-actions button.confirm{
+    background:var(--red); border-color:var(--red); color:#fff;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Інвентаризація техніки</h1>
+  <p class="sub">Дудченко Я. А. (Ярослав Андрійович)</p>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div id="overallBar" style="width:0%"></div></div>
+    <span class="progress-label" id="overallLabel">0 / 0</span>
+  </div>
+  <div class="import-row">
+    <button class="import-btn" id="importBtn" type="button">⇪ Імпорт з Excel (оборотна відомість)</button>
+    <button class="import-clear-btn" id="clearImportBtn" type="button">Скинути імпортовані рахунки</button>
+    <input type="file" id="importFileInput" accept=".xlsx,.xls" multiple style="display:none">
+    <div class="import-status" id="importStatus"></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+
+<main id="main"></main>
+
+<button class="reset-all" id="resetAllBtn">Скинути всі позначки</button>
+<p class="footer-note">Дані зберігаються локально на цьому пристрої</p>
+
+<div id="modalOverlay" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <p id="modalText"></p>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const BASE_DATA = {
+  "1041": {
+    label: "10Д",
+    title: "Рахунок 1041",
+    batches: [
+      {
+        id:"b1", account:"1041110300010010 [001080]", analytics:"01.3110.197017",
+        contragent:"ТОВ «БМС-Лайн Сервіс» (ЄДРПОУ 36707155)",
+        contract:"Договір 43 від 25.08.2021 · Накладна 428 від 21.10.2021",
+        items:[
+          {nomen:"101402106", name:"Відеокарта AMD Radeon RX 570 8GB GDDR5 Armor OC MSI", unit:"шт", price:20442.00, qty:1, sum:20442.00}
+        ]
+      },
+      {
+        id:"b2", account:"1041110300010010 [001080]", analytics:"01.3110",
+        contragent:"ТОВ «БМС-Лайн Сервіс» (та сама партія)",
+        contract:"Продовження аналітики 01.3110 — реквізити договору без змін",
+        items:[
+          {nomen:"101402071", name:"Відеокамера Sony HXR-NX100", unit:"шт", price:44800.00, qty:1, sum:44800.00}
+        ]
+      },
+      {
+        id:"b3", account:"1041110300030010 [001080]", analytics:"01.2210.13964",
+        contragent:"ФОП Слівка Петро Васильович (ІПН 2355804777)",
+        contract:"Договір 11 від 05.05.2017",
+        items:[
+          {nomen:"10141005", name:"Сканер А4 Canon CanoScan LIDE-2500", unit:"шт", price:2500.00, qty:1, sum:2500.00},
+          {nomen:"10141006", name:"Екран настінний (1:1) 203×203", unit:"шт", price:1950.00, qty:10, sum:19500.00},
+          {nomen:"10141008", name:"Принтер Canon LBP-6030", unit:"шт", price:3700.00, qty:3, sum:11100.00},
+          {nomen:"10141009", name:"Ноутбук HP 250 G5", unit:"шт", price:5900.00, qty:2, sum:11800.00},
+          {nomen:"101460406", name:"Модем-роутер", unit:"шт", price:5500.00, qty:1, sum:5500.00}
+        ]
+      }
+    ]
+  },
+  "1113": {
+    label: "11Д",
+    title: "Рахунок 1113",
+    batches: [
+      {
+        id:"b1", account:"1113111130030020 [001050]", analytics:"01.2210.389502",
+        contragent:"ТОВ «БМС-Лайн Сервіс» (ЄДРПОУ 36707155)",
+        contract:"Договір 78 від 14.04.2025 · Накладна 366 від 17.10.2024",
+        items:[
+          {nomen:"1113006348", name:"Комутатор мережевий ZyXel GS1915-24EP EU0101F", unit:"шт", price:18438.00, qty:1, sum:18438.00},
+          {nomen:"1113006350", name:"Маршрутизатор MikroTik RB3011UAS-RM", unit:"шт", price:10224.00, qty:1, sum:10224.00},
+          {nomen:"1113006351", name:"Маршрутизатор Ruijie Networks RG-EW1300G", unit:"шт", price:2790.00, qty:8, sum:22320.00}
+        ]
+      },
+      {
+        id:"b2", account:"1113111130030020 [001050]", analytics:"01.2210.395808",
+        contragent:"ТОВ «БМС-Лайн Сервіс» (ЄДРПОУ 36707155)",
+        contract:"Договір 78 від 14.04.2025 · Накладна 133 від 15.04.2025",
+        items:[
+          {nomen:"1113006347", name:"Планшет Lenovo Tab M11 8/128 WiFi, Luna Grey + Pen", unit:"шт", price:13644.00, qty:1, sum:13644.00},
+          {nomen:"1113006348", name:"Комутатор мережевий ZyXel GS1915-24EP EU0101F", unit:"шт", price:18438.00, qty:1, sum:18438.00},
+          {nomen:"1113006349", name:"Пристрій безперебійного живлення Ritar RT-2KS-LCD", unit:"шт", price:19944.00, qty:2, sum:39888.00},
+          {nomen:"1113006351", name:"Маршрутизатор Ruijie Networks RG-EW1300G", unit:"шт", price:2790.00, qty:15, sum:41850.00},
+          {nomen:"1113006353", name:"Миша KY-FD-EL RM-480W Wireless/Bluetooth White", unit:"шт", price:894.00, qty:10, sum:8940.00}
+        ]
+      }
+    ]
+  }
+};
+
+const OVERRIDES_KEY = 'audit_import_overrides_v1';
+let importedOverrides = {};
+let DATA = {};
+
+let activeTab = null;
+let state = {};
+let stateLoaded = false;
+let searchQuery = "";
+
+function loadOverrides(){
+  try{
+    const raw = localStorage.getItem(OVERRIDES_KEY);
+    importedOverrides = raw ? JSON.parse(raw) : {};
+  }catch(e){
+    importedOverrides = {};
+  }
+}
+function saveOverrides(){
+  try{
+    localStorage.setItem(OVERRIDES_KEY, JSON.stringify(importedOverrides));
+  }catch(e){
+    console.error('overrides save failed', e);
+    showModal('Не вдалося зберегти імпортовані дані на пристрої.');
+  }
+}
+function rebuildData(){
+  DATA = JSON.parse(JSON.stringify(BASE_DATA));
+  Object.keys(importedOverrides).forEach(key=>{
+    DATA[key] = importedOverrides[key];
+  });
+  if(!activeTab || !DATA[activeTab]){
+    activeTab = Object.keys(DATA)[0];
+  }
+}
+
+// --- Excel import: parses "Оборотна відомість по товарно-матеріальних цінностях" xlsx exports ---
+
+function cleanItemName(raw){
+  // Strips a trailing batch-price suffix like "/20442,00" or " -1950,00"
+  // that this report sometimes appends to the item name. Only strips when
+  // clearly separated by "/" or " -" so real model numbers (e.g. "LIDE-2500")
+  // aren't damaged.
+  return String(raw)
+    .replace(/(?:\/|\s-)\s*\d{1,3}(?:\d{3})*[.,]\d{2}\s*$/, '')
+    .trim();
+}
+
+function parseContragentInfo(inner){
+  const parts = inner.split(';').map(s=>s.trim());
+  const code = parts[0] || '';
+  let name = parts[1] || '';
+  let qCount = 0;
+  name = name.replace(/"/g, ()=>{ qCount++; return qCount % 2 === 1 ? '«' : '»'; });
+
+  const codeLabel = code.length === 8 ? 'ЄДРПОУ' : (code.length === 10 ? 'ІПН' : 'код');
+  const contragent = code ? `${name} (${codeLabel} ${code})` : name;
+
+  const label1 = parts[2], num1 = parts[3], date1 = parts[4];
+  const label2 = parts[5], num2 = parts[6], date2 = parts[7];
+  let contract = '';
+  if(label1 && num1 && date1){
+    contract = `${label1} ${num1} від ${date1}`;
+    if(label2 && num2 && date2 && !(label2===label1 && num2===num1 && date2===date1)){
+      contract += ` · ${label2} ${num2} від ${date2}`;
+    }
+  }
+  return {contragent, contract};
+}
+
+function parseBatchHeader(raw){
+  const m = raw.match(/^(\d+)\s*\[(\d+)\][^]*?Аналітика:\s*([\d.]+)\s*(?:\((.*)\))?\s*$/);
+  if(!m) return null;
+  const account = `${m[1]} [${m[2]}]`;
+  const analytics = m[3];
+  const inner = m[4];
+  if(inner){
+    const {contragent, contract} = parseContragentInfo(inner);
+    return {account, analytics, contragent, contract, continuation:false};
+  }
+  return {
+    account, analytics,
+    contragent: null,
+    contract: `Продовження аналітики ${analytics} — реквізити договору без змін`,
+    continuation: true
+  };
+}
+
+function parseTurnoverSheet(rows, filename){
+  const batches = [];
+  let curBatch = null;
+  let lastContragent = null;
+  let accPrefix = null;
+
+  rows.forEach(row=>{
+    const c0raw = row[0];
+    if(c0raw === null || c0raw === undefined) return;
+    const c0 = String(c0raw).trim();
+    if(!c0) return;
+
+    if(/Аналітика:/.test(c0)){
+      const parsed = parseBatchHeader(c0);
+      if(!parsed) return;
+      if(!accPrefix) accPrefix = parsed.account.slice(0, 4);
+      let contragent = parsed.contragent;
+      if(contragent){
+        lastContragent = contragent;
+      }else{
+        contragent = (lastContragent || 'Той самий контрагент') + ' (та сама партія)';
+      }
+      curBatch = {
+        id: 'b' + (batches.length + 1),
+        account: parsed.account,
+        analytics: parsed.analytics,
+        contragent,
+        contract: parsed.contract,
+        items: []
+      };
+      batches.push(curBatch);
+      return;
+    }
+
+    const low = c0.toLowerCase();
+    if(low.startsWith('разом') || low.startsWith('всього') || low.startsWith('итого')) return;
+
+    if(curBatch && /^\d+$/.test(c0)){
+      const nomen = row[1] != null ? String(row[1]).trim() : '';
+      const name = row[2] != null ? cleanItemName(row[2]) : '';
+      const unit = row[3] != null ? String(row[3]).trim() : 'шт';
+      const price = Number(row[4]) || 0;
+      const qty = Number(row[12]) || 0;   // кінцеве сальдо, кількість
+      const sum = Number(row[13]) || 0;   // кінцеве сальдо, сума
+      if(nomen && name && qty > 0){
+        curBatch.items.push({nomen, name, unit, price, qty, sum});
+      }
+    }
+  });
+
+  const nonEmptyBatches = batches.filter(b=>b.items.length > 0);
+  const key = accPrefix || ('imp_' + Date.now());
+  const label = filename.replace(/\.[^.]+$/, '').replace(/^\d+_/, '') || key;
+  return {key, label, title: `Рахунок ${key}`, batches: nonEmptyBatches};
+}
+
+function findTargetKey(label){
+  const norm = s => String(s || '').trim().toLowerCase();
+  const wanted = norm(label);
+  const keys = Object.keys(DATA);
+  let found = keys.find(k => norm(DATA[k].label) === wanted);
+  if(found) return found;
+  found = keys.find(k => wanted && (norm(DATA[k].label).includes(wanted) || wanted.includes(norm(DATA[k].label))));
+  if(found) return found;
+  return null;
+}
+
+async function importExcelFiles(fileList){
+  const files = Array.from(fileList || []);
+  if(files.length === 0) return;
+  const statusEl = document.getElementById('importStatus');
+  const results = [];
+
+  for(const file of files){
+    try{
+      statusEl.textContent = `Обробка "${file.name}"…`;
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+      const parsed = parseTurnoverSheet(rows, file.name);
+      if(parsed.batches.length === 0){
+        results.push(`«${file.name}»: жодної позиції не розпізнано`);
+        continue;
+      }
+      const itemCount = parsed.batches.reduce((s,b)=>s+b.items.length,0);
+      const targetKey = findTargetKey(parsed.label) || activeTab || Object.keys(DATA)[0];
+      const existing = DATA[targetKey];
+      const label = existing ? existing.label : parsed.label;
+      const title = existing ? existing.title : parsed.title;
+      importedOverrides[targetKey] = {label, title, batches: parsed.batches};
+      const matchNote = (existing && findTargetKey(parsed.label) === targetKey)
+        ? ''
+        : ` (мітку "${parsed.label}" не знайдено серед наявних вкладок — дані оновлено у вкладці "${label}")`;
+      results.push(`«${file.name}» → вкладка "${label}": ${parsed.batches.length} партій, ${itemCount} позицій${matchNote}`);
+    }catch(err){
+      console.error(err);
+      results.push(`«${file.name}»: помилка читання (${err.message})`);
+    }
+  }
+
+  saveOverrides();
+  rebuildData();
+  render();
+  statusEl.textContent = '';
+  showModal(results.join('\n'));
+}
+
+function fmt(n){
+  return Number(n).toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function itemId(accKey, batchId, idx){
+  return accKey + "__" + batchId + "__" + idx;
+}
+
+const STORAGE_KEY = 'audit_state_v1';
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? JSON.parse(raw) : {};
+  }catch(e){
+    state = {};
+  }
+  stateLoaded = true;
+}
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    console.error('storage save failed', e);
+    showModal('Не вдалося зберегти дані на пристрої. Перевірте налаштування браузера (приватний режим блокує збереження).');
+  }
+}
+
+function getEntry(id){
+  if(!state[id]) state[id] = {found:0, done:false, note:""};
+  return state[id];
+}
+
+function renderTabs(){
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = "";
+  Object.keys(DATA).forEach(key=>{
+    const btn = document.createElement('div');
+    btn.className = 'tab-btn' + (key===activeTab ? ' active' : '');
+    btn.textContent = DATA[key].label;
+    btn.onclick = ()=>{ activeTab = key; render(); };
+    tabsEl.appendChild(btn);
+  });
+}
+
+function computeOverall(){
+  let totalItems=0, doneItems=0;
+  Object.keys(DATA).forEach(accKey=>{
+    DATA[accKey].batches.forEach(batch=>{
+      batch.items.forEach((it, idx)=>{
+        totalItems++;
+        const id = itemId(accKey, batch.id, idx);
+        if(getEntry(id).done) doneItems++;
+      });
+    });
+  });
+  return {totalItems, doneItems};
+}
+
+function renderHeader(){
+  const {totalItems, doneItems} = computeOverall();
+  const pct = totalItems ? Math.round(doneItems/totalItems*100) : 0;
+  document.getElementById('overallBar').style.width = pct + "%";
+  document.getElementById('overallLabel').textContent = doneItems + " / " + totalItems;
+}
+
+function renderMain(){
+  const main = document.getElementById('main');
+  main.innerHTML = "";
+
+  const searchRow = document.createElement('div');
+  searchRow.className = 'search-row';
+  searchRow.innerHTML = `<input type="text" id="searchInput" placeholder="Пошук за назвою або номенклатурним номером" value="${searchQuery.replace(/"/g,'&quot;')}">`;
+  main.appendChild(searchRow);
+  searchRow.querySelector('input').addEventListener('input', (e)=>{
+    searchQuery = e.target.value.toLowerCase();
+    renderBatches();
+  });
+
+  const batchesWrap = document.createElement('div');
+  batchesWrap.id = 'batchesWrap';
+  main.appendChild(batchesWrap);
+
+  renderBatches();
+}
+
+function renderBatches(){
+  const accKey = activeTab;
+  const wrap = document.getElementById('batchesWrap');
+  wrap.innerHTML = "";
+  const accData = DATA[accKey];
+
+  accData.batches.forEach(batch=>{
+    const visibleItems = batch.items
+      .map((it, idx)=>({it, idx}))
+      .filter(({it})=> !searchQuery ||
+        it.name.toLowerCase().includes(searchQuery) ||
+        it.nomen.toLowerCase().includes(searchQuery));
+
+    if(visibleItems.length === 0) return;
+
+    let batchFoundQty=0, batchTargetQty=0, batchDone=0;
+    batch.items.forEach((it, idx)=>{
+      const id = itemId(accKey, batch.id, idx);
+      const e = getEntry(id);
+      batchFoundQty += Math.min(e.found, it.qty);
+      batchTargetQty += it.qty;
+      if(e.done) batchDone++;
+    });
+
+    const batchEl = document.createElement('div');
+    batchEl.className = 'batch';
+    batchEl.innerHTML = `
+      <div class="batch-head">
+        <div class="acc">${batch.account} · аналітика ${batch.analytics}</div>
+        <div class="contragent">${batch.contragent}</div>
+        <div class="contract">${batch.contract}</div>
+        <div class="batch-summary">
+          <span>Перевірено: ${batchDone} / ${batch.items.length}</span>
+          <span>К-сть: ${fmt(batchFoundQty)} / ${fmt(batchTargetQty)}</span>
+        </div>
+      </div>
+    `;
+
+    visibleItems.forEach(({it, idx})=>{
+      const id = itemId(accKey, batch.id, idx);
+      const entry = getEntry(id);
+      const found = Math.min(entry.found, it.qty);
+      const pct = it.qty ? Math.min(100, Math.round(found/it.qty*100)) : 0;
+
+      const card = document.createElement('div');
+      card.className = 'item' + (entry.done ? ' done' : '');
+      card.innerHTML = `
+        <div class="stamp">перевірено</div>
+        <div class="item-top">
+          <span class="nomen">${it.nomen}</span>
+        </div>
+        <div class="name">${it.name}</div>
+        <div class="meta-row">
+          <span>Ціна: ${fmt(it.price)} грн</span>
+          <span>${it.unit} · ${fmt(it.qty)} шт · ${fmt(it.sum)} грн</span>
+        </div>
+        <div class="qty-row">
+          <div class="qty-bar-wrap">
+            <div class="qty-text"><span>Знайдено: ${fmt(found)} / ${fmt(it.qty)}</span><span>${pct}%</span></div>
+            <div class="qty-bar"><div style="width:${pct}%"></div></div>
+          </div>
+        </div>
+        <div class="add-row">
+          <input type="number" min="0" step="1" placeholder="+к-сть" class="add-input">
+          <button class="add-btn">Додати</button>
+          <button class="clear-btn">Скинути</button>
+          <button class="toggle-btn">${entry.done ? 'Знято позначку' : 'Позначити знайденим'}</button>
+        </div>
+        <textarea class="note" placeholder="Хто зберігає / примітка">${entry.note || ""}</textarea>
+      `;
+
+      const addInput = card.querySelector('.add-input');
+      const addBtn = card.querySelector('.add-btn');
+      const clearBtn = card.querySelector('.clear-btn');
+      const toggleBtn = card.querySelector('.toggle-btn');
+      const noteEl = card.querySelector('.note');
+
+      addBtn.onclick = ()=>{
+        const val = parseFloat(addInput.value);
+        if(!val || val <= 0) return;
+        entry.found = (entry.found || 0) + val;
+        if(entry.found >= it.qty) entry.done = true;
+        addInput.value = "";
+        saveState();
+        renderBatches();
+        renderHeader();
+      };
+
+      clearBtn.onclick = ()=>{
+        entry.found = 0;
+        entry.done = false;
+        saveState();
+        renderBatches();
+        renderHeader();
+      };
+
+      toggleBtn.onclick = ()=>{
+        entry.done = !entry.done;
+        saveState();
+        renderBatches();
+        renderHeader();
+      };
+
+      let noteTimer;
+      noteEl.addEventListener('input', ()=>{
+        entry.note = noteEl.value;
+        clearTimeout(noteTimer);
+        noteTimer = setTimeout(saveState, 500);
+      });
+
+      batchEl.appendChild(card);
+    });
+
+    wrap.appendChild(batchEl);
+  });
+}
+
+function render(){
+  renderTabs();
+  renderHeader();
+  renderMain();
+}
+
+function showModal(text, onConfirm){
+  const overlay = document.getElementById('modalOverlay');
+  const textEl = document.getElementById('modalText');
+  const actionsEl = document.getElementById('modalActions');
+  textEl.textContent = text;
+  actionsEl.innerHTML = "";
+
+  if(onConfirm){
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Скасувати';
+    cancelBtn.onclick = ()=>{ overlay.style.display = 'none'; };
+    const okBtn = document.createElement('button');
+    okBtn.className = 'confirm';
+    okBtn.textContent = 'Скинути';
+    okBtn.onclick = ()=>{ overlay.style.display = 'none'; onConfirm(); };
+    actionsEl.appendChild(cancelBtn);
+    actionsEl.appendChild(okBtn);
+  }else{
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'Гаразд';
+    okBtn.onclick = ()=>{ overlay.style.display = 'none'; };
+    actionsEl.appendChild(okBtn);
+  }
+  overlay.style.display = 'flex';
+}
+
+document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+  showModal('Скинути всі позначки, кількості та примітки по всіх рахунках? Дію не можна скасувати.', ()=>{
+    state = {};
+    saveState();
+    render();
+  });
+});
+
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importFileInput').click();
+});
+document.getElementById('importFileInput').addEventListener('change', (e)=>{
+  importExcelFiles(e.target.files);
+  e.target.value = '';
+});
+document.getElementById('clearImportBtn').addEventListener('click', ()=>{
+  if(Object.keys(importedOverrides).length === 0){
+    showModal('Імпортованих рахунків ще немає.');
+    return;
+  }
+  showModal('Скинути всі імпортовані з Excel рахунки й повернутися до вбудованих даних? Позначки перевірки для цих рахунків також буде втрачено.', ()=>{
+    importedOverrides = {};
+    saveOverrides();
+    rebuildData();
+    render();
+  });
+});
+
+loadOverrides();
+rebuildData();
+loadState();
+render();
+</script>
+</body>
+</html>
